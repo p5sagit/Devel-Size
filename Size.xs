@@ -471,7 +471,7 @@ op_size(pTHX_ const OP * const baseop, struct state *st)
 #endif
 	    TAG;break;
 	case OPc_SVOP: TAG;
-	    st->total_size += sizeof(struct pmop);
+	    st->total_size += sizeof(struct svop);
 	    if (!(baseop->op_type == OP_AELEMFAST
 		  && baseop->op_flags & OPf_SPECIAL)) {
 		/* not an OP_PADAV replacement */
