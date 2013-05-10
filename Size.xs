@@ -518,7 +518,15 @@ op_size(pTHX_ const OP * const baseop, struct state *st)
 #endif
 #ifdef USE_ITHREADS
           check_new_and_strlen(st, basecop->cop_file);
+#ifdef PERL_VERSION < 17 || (PERL_VERSION == 17 && PERL_SUBVERSION == 0)
+	  /* This pointer is owned by the COP, and freed with it.  */
           check_new_and_strlen(st, basecop->cop_stashpv);
+#else
+	  /* A per-interpreter pointer for this stash is allocated in
+	     PL_stashpad. */
+	  if (check_new(st, PL_stashpad + basecop->cop_stashoff))
+	      st->total_size += sizeof(PL_stashpad[basecop->cop_stashoff]);
+#endif
 #else
 	  sv_size(aTHX_ st, (SV *)basecop->cop_filegv, SOME_RECURSION);
 #endif
