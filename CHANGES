@@ -1,5 +1,6 @@
 Revision history for Perl extension Devel::Size.
 
+ * stubbed subs no longer have CvOUTSIDE set [CPAN #77913]
  * Fix for v5.17.2's OP slab allocator [CPAN #83903]
  * Spelling fix to docs from gregor herrmann [CPAN #78766]
 
