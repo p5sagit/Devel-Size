@@ -4,7 +4,7 @@
       "unknown"
    ],
    "dynamic_config" : 1,
-   "generated_by" : "ExtUtils::MakeMaker version 6.6302, CPAN::Meta::Converter version 2.120630",
+   "generated_by" : "ExtUtils::MakeMaker version 6.6501, CPAN::Meta::Converter version 2.120921",
    "license" : [
       "perl_5"
    ],
@@ -38,6 +38,6 @@
          }
       }
    },
-   "release_status" : "stable",
-   "version" : "0.78"
+   "release_status" : "testing",
+   "version" : "0.78_50"
 }
