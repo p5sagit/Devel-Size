@@ -1,5 +1,6 @@
 Revision history for Perl extension Devel::Size.
 
+0.78_50 2013-05-10 nicholas
  * Alternative test for CvOUTSIDE, and one for CvPADLIST
  * v5.17 changes the type of PADLIST [CPAN #83904]
  * stubbed subs no longer have CvOUTSIDE set [CPAN #77913]
