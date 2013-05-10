@@ -802,7 +802,7 @@ sv_size(pTHX_ struct state *const st, const SV * const orig_thing,
     sv_size(aTHX_ st, (SV *)CvOUTSIDE(thing), recurse);
     if (CvISXSUB(thing)) {
 	sv_size(aTHX_ st, cv_const_sv((CV *)thing), recurse);
-    } else {
+    } else if (CvROOT(thing)) {
 	op_size(aTHX_ CvSTART(thing), st);
 	op_size(aTHX_ CvROOT(thing), st);
     }

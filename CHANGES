@@ -1,5 +1,6 @@
 Revision history for Perl extension Devel::Size.
 
+ * Fix for v5.17.2's OP slab allocator [CPAN #83903]
  * Spelling fix to docs from gregor herrmann [CPAN #78766]
 
 0.78 2011-07-26 nicholas
