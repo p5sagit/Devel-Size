@@ -660,6 +660,30 @@ const U8 body_sizes[SVt_LAST] = {
 #endif
 };
 
+#ifdef PadlistNAMES
+static void
+padlist_size(pTHX_ struct state *const st, const PADLIST * const padl,
+	const int recurse) {
+    SSize_t i;
+    if (!check_new(st, padl))
+	return;
+    /* This relies on PADNAMELIST and PAD being typedefed to AV.  If that
+       ever changes, this code will need an update. */
+    st->total_size += sizeof(PADLIST);
+    sv_size(aTHX_ st, (SV*)PadlistNAMES(padl), recurse);
+    i = PadlistMAX(padl) + 1;
+    st->total_size += sizeof(PAD*) * i;
+    while (--i)
+	sv_size(aTHX_ st, (SV*)PadlistARRAY(padl)[i], recurse);
+}
+#else 
+static void
+padlist_size(pTHX_ struct state *const st, const AV * const padl,
+	const int recurse) {
+    sv_size(aTHX_ st, (SV*)padl, recurse);
+}
+#endif
+
 static void
 sv_size(pTHX_ struct state *const st, const SV * const orig_thing,
 	const int recurse) {
@@ -785,7 +809,7 @@ sv_size(pTHX_ struct state *const st, const SV * const orig_thing,
 
 
   case SVt_PVFM: TAG;
-    sv_size(aTHX_ st, (SV *)CvPADLIST(thing), SOME_RECURSION);
+    padlist_size(aTHX_ st, CvPADLIST(thing), SOME_RECURSION);
     sv_size(aTHX_ st, (SV *)CvOUTSIDE(thing), recurse);
 
     if (st->go_yell && !st->fm_whine) {
@@ -798,7 +822,7 @@ sv_size(pTHX_ struct state *const st, const SV * const orig_thing,
     sv_size(aTHX_ st, (SV *)CvSTASH(thing), SOME_RECURSION);
     sv_size(aTHX_ st, (SV *)SvSTASH(thing), SOME_RECURSION);
     sv_size(aTHX_ st, (SV *)CvGV(thing), SOME_RECURSION);
-    sv_size(aTHX_ st, (SV *)CvPADLIST(thing), SOME_RECURSION);
+    padlist_size(aTHX_ st, CvPADLIST(thing), SOME_RECURSION);
     sv_size(aTHX_ st, (SV *)CvOUTSIDE(thing), recurse);
     if (CvISXSUB(thing)) {
 	sv_size(aTHX_ st, cv_const_sv((CV *)thing), recurse);
