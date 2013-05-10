@@ -1,5 +1,8 @@
 Revision history for Perl extension Devel::Size.
 
+0.78_52 2013-05-10 nicholas
+ * Fix the bug in the previous fix. Oops :-)
+
 0.78_51 2013-05-10 nicholas
  * v5.17.1 and later handle CopSTASH differently under ithreads
 

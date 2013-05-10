@@ -518,7 +518,7 @@ op_size(pTHX_ const OP * const baseop, struct state *st)
 #endif
 #ifdef USE_ITHREADS
           check_new_and_strlen(st, basecop->cop_file);
-#ifdef PERL_VERSION < 17 || (PERL_VERSION == 17 && PERL_SUBVERSION == 0)
+#if PERL_VERSION < 17 || (PERL_VERSION == 17 && PERL_SUBVERSION == 0)
 	  /* This pointer is owned by the COP, and freed with it.  */
           check_new_and_strlen(st, basecop->cop_stashpv);
 #else
