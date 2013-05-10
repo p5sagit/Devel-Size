@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 
 use strict;
-use Test::More tests => 12;
+use Test::More tests => 13;
 use Devel::Size ':all';
 
 sub zwapp;
@@ -53,3 +53,16 @@ my $short_pvop = total_size(sub {goto GLIT});
 my $long_pvop = total_size(sub {goto KREEK_KREEK_CLANK_CLANK});
 cmp_ok($short_pvop, '>', $anon_size, 'OPc_PVOP can be measured');
 is($long_pvop, $short_pvop + 19, 'the only size difference is the label length');
+
+sub bloop {
+    my $clunk = shift;
+    if (--$clunk > 0) {
+	bloop($clunk);
+    }
+}
+
+my $before_size = total_size(\&bloop);
+bloop(42);
+my $after_size = total_size(\&bloop);
+
+cmp_ok($after_size, '>', $before_size, 'Recursion increases the PADLIST');
