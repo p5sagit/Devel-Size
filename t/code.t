@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 
 use strict;
-use Test::More tests => 13;
+use Test::More tests => 14;
 use Devel::Size ':all';
 
 sub zwapp;
@@ -66,3 +66,26 @@ bloop(42);
 my $after_size = total_size(\&bloop);
 
 cmp_ok($after_size, '>', $before_size, 'Recursion increases the PADLIST');
+
+sub closure_with_eval {
+    my $a;
+    return sub { eval ""; $a };
+}
+
+sub closure_without_eval {
+    my $a;
+    return sub { require ""; $a };
+}
+
+if ($] > 5.017001) {
+    # Again relying too much on the core's implementation, but while that holds,
+    # this does test that CvOUTSIDE() is being followed.
+    cmp_ok(total_size(closure_with_eval()), '>',
+	   total_size(closure_without_eval()) + 256,
+	   'CvOUTSIDE is now NULL on cloned closures, unless they have eval');
+} else {
+    # Seems that they differ by a few bytes on 5.8.x
+    cmp_ok(total_size(closure_with_eval()), '<=',
+	   total_size(closure_without_eval()) + 256,
+	   "CvOUTSIDE is set on all cloned closures, so these won't differ by much");
+}

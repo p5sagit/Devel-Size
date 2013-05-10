@@ -1,5 +1,6 @@
 Revision history for Perl extension Devel::Size.
 
+ * Alternative test for CvOUTSIDE, and one for CvPADLIST
  * v5.17 changes the type of PADLIST [CPAN #83904]
  * stubbed subs no longer have CvOUTSIDE set [CPAN #77913]
  * Fix for v5.17.2's OP slab allocator [CPAN #83903]
