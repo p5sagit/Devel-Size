@@ -520,7 +520,6 @@ op_size(pTHX_ const OP * const baseop, struct state *st)
           check_new_and_strlen(st, basecop->cop_file);
           check_new_and_strlen(st, basecop->cop_stashpv);
 #else
-	  sv_size(aTHX_ st, (SV *)basecop->cop_stash, SOME_RECURSION);
 	  sv_size(aTHX_ st, (SV *)basecop->cop_filegv, SOME_RECURSION);
 #endif
 
