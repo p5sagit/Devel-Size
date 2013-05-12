@@ -1,5 +1,8 @@
 Revision history for Perl extension Devel::Size.
 
+0.79 2013-05-12 nicholas
+ [no changes]
+
 0.78_52 2013-05-10 nicholas
  * Fix the bug in the previous fix. Oops :-)
 
