@@ -707,7 +707,7 @@ sv_size(pTHX_ struct state *const st, const SV * const orig_thing,
   }
   st->total_size += sizeof(SV) + body_sizes[type];
 
-  if (type >= SVt_PVMG) {
+  if (SvMAGICAL(thing)) {
       magic_size(aTHX_ thing, st);
   }
 
