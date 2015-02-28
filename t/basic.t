@@ -118,7 +118,10 @@ foreach(['undef', total_size(undef)],
     my $before_size = total_size($uurk);
     my $before_length = length $uurk;
     cmp_ok($before_size, '>', $before_length, 'Size before is sane');
-    $uurk =~ s/Perl //;
+    # As of 5.20.0, s/// doesn't trigger COW.
+    # Seems that formline is about the the only thing left that reliably calls
+    # sv_chop. See CPAN #95493, perl #122322
+    formline '^<<<<~', $uurk;
     is(total_size($uurk), $before_size,
        "Size doesn't change because OOK is used");
     cmp_ok(length $uurk, '<', $before_size, 'but string is shorter');
