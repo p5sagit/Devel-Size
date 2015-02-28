@@ -1,5 +1,7 @@
 Revision history for Perl extension Devel::Size.
 
+0.79_51 2015-02-28 nicholas
+
 0.79_50 2015-02-28 nicholas
     patches from Zefram:
   * wrong test for magicalness [CPAN #88180]
