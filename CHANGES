@@ -1,6 +1,9 @@
 Revision history for Perl extension Devel::Size.
 
 0.79_50 2015-02-28 nicholas
+    patches from Zefram:
+  * wrong test for magicalness [CPAN #88180]
+  * reading tied scalar shrinks it [CPAN #88182]
 
 0.79 2013-05-12 nicholas
  [no changes]
