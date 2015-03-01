@@ -921,13 +921,15 @@ sv_size(pTHX_ struct state *const st, const SV * const orig_thing,
     sv_size(aTHX_ st, (SV *)CvSTASH(thing), SOME_RECURSION);
     sv_size(aTHX_ st, (SV *)SvSTASH(thing), SOME_RECURSION);
     sv_size(aTHX_ st, (SV *)CvGV(thing), SOME_RECURSION);
-    padlist_size(aTHX_ st, CvPADLIST(thing), SOME_RECURSION);
     sv_size(aTHX_ st, (SV *)CvOUTSIDE(thing), recurse);
     if (CvISXSUB(thing)) {
 	sv_size(aTHX_ st, cv_const_sv((CV *)thing), recurse);
-    } else if (CvROOT(thing)) {
-	op_size(aTHX_ CvSTART(thing), st);
-	op_size(aTHX_ CvROOT(thing), st);
+    } else {
+        padlist_size(aTHX_ st, CvPADLIST(thing), SOME_RECURSION);
+        if (CvROOT(thing)) {
+            op_size(aTHX_ CvSTART(thing), st);
+            op_size(aTHX_ CvROOT(thing), st);
+        }
     }
     goto freescalar;
 

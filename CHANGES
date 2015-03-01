@@ -6,6 +6,11 @@ Revision history for Perl extension Devel::Size.
   * handle the multideref op, and to a limited extent the UNOP_AUX op class in
     general. [CPAN #102911]
 
+  * As of eacbb37937698a03 (v5.21.6), can't call CvPADLIST on an XSUB.
+    More usefully, the slot is now used for XS versioning protection, which
+    means that we can be confident that nothing out there is using it for data.
+    Reported as [CPAN #102909].
+
 0.79_51 2015-02-28 nicholas
   * as of 5.20.0, s/// is no longer a reliable test for OOK [CPAN #95493]
 
