@@ -1,5 +1,7 @@
 Revision history for Perl extension Devel::Size.
 
+0.79_53 2015-03-21 nicholas
+
 0.79_52 2015-03-20 nicholas
     two patches from Zefram:
   * handle the new METHOP. [CPAN #101071]
