@@ -1,6 +1,8 @@
 Revision history for Perl extension Devel::Size.
 
 0.79_52 2015-02-28 nicholas
+    patches from Zefram:
+  * handle the new METHOP. [CPAN #101071]
 
 0.79_51 2015-02-28 nicholas
   * as of 5.20.0, s/// is no longer a reliable test for OOK [CPAN #95493]

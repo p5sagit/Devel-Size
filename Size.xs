@@ -215,6 +215,9 @@ typedef enum {
 #ifdef OA_GVOP
     , OPc_GVOP /* 13 */
 #endif
+#ifdef OA_METHOP
+    , OPc_METHOP
+#endif
 
 } opclass;
 
@@ -336,6 +339,11 @@ cc_opclass(const OP * const o)
 #ifdef OA_CONDOP
         case OA_CONDOP: TAG;
 	    return OPc_CONDOP;
+#endif
+
+#ifdef OA_METHOP
+	case OA_METHOP: TAG;
+	    return OPc_METHOP;
 #endif
         }
         warn("Devel::Size: Can't determine class of operator %s, assuming BASEOP\n",
@@ -533,6 +541,20 @@ op_size(pTHX_ const OP * const baseop, struct state *st)
 
         }
         TAG;break;
+#ifdef OA_METHOP
+	case OPc_METHOP: TAG;
+	    st->total_size += sizeof(struct methop);
+	    if (baseop->op_type != OP_METHOD)
+		sv_size(aTHX_ st, cMETHOPx_meth(baseop), SOME_RECURSION);
+#if PERL_VERSION*1000+PERL_SUBVERSION >= 21007
+	    if (baseop->op_type == OP_METHOD_REDIR || baseop->op_type == OP_METHOD_REDIR_SUPER) {
+		SV *rclass = cMETHOPx_rclass(baseop);
+		if(SvTYPE(rclass) != SVt_PVHV)
+		    sv_size(aTHX_ st, rclass, SOME_RECURSION);
+	    }
+#endif
+	    TAG;break;
+#endif
       default:
         TAG;break;
       }
