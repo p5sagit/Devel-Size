@@ -7,6 +7,7 @@ Revision history for Perl extension Devel::Size.
   * Handle PADNAMELIST/PADNAME introduced in v5.21.7
     two patches from Zefram:
   * Add handling of children of METHOP and UNOP_AUX ops [CPAN #102911]
+  * More complete handling of padlists for XSUBs [CPAN #102909]
 
 0.79_52 2015-03-20 nicholas
     two patches from Zefram:
