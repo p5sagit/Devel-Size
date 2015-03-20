@@ -218,6 +218,9 @@ typedef enum {
 #ifdef OA_METHOP
     , OPc_METHOP
 #endif
+#ifdef OA_UNOP_AUX
+    , OPc_UNAUXOP
+#endif
 
 } opclass;
 
@@ -344,6 +347,10 @@ cc_opclass(const OP * const o)
 #ifdef OA_METHOP
 	case OA_METHOP: TAG;
 	    return OPc_METHOP;
+#endif
+#ifdef OA_UNOP_AUX
+	case OA_UNOP_AUX: TAG;
+	    return OPc_UNAUXOP;
 #endif
         }
         warn("Devel::Size: Can't determine class of operator %s, assuming BASEOP\n",
@@ -553,6 +560,69 @@ op_size(pTHX_ const OP * const baseop, struct state *st)
 		    sv_size(aTHX_ st, rclass, SOME_RECURSION);
 	    }
 #endif
+	    TAG;break;
+#endif
+#ifdef OA_UNOP_AUX
+	case OPc_UNAUXOP: TAG;
+	    st->total_size += sizeof(struct unop_aux) + sizeof(UNOP_AUX_item) * (cUNOP_AUXx(baseop)->op_aux[-1].uv+1);
+	    if (baseop->op_type == OP_MULTIDEREF) {
+		UNOP_AUX_item *items = cUNOP_AUXx(baseop)->op_aux;
+		UV actions = items->uv;
+		bool last = 0;
+		bool is_hash = 0;
+		while (!last) {
+		    switch (actions & MDEREF_ACTION_MASK) {
+			case MDEREF_reload:
+			    actions = (++items)->uv;
+			    continue;
+			case MDEREF_HV_padhv_helem:
+			case MDEREF_HV_gvhv_helem:
+			case MDEREF_HV_gvsv_vivify_rv2hv_helem:
+			case MDEREF_HV_padsv_vivify_rv2hv_helem:
+			    is_hash = 1;
+			case MDEREF_AV_padav_aelem:
+			case MDEREF_AV_gvav_aelem:
+			case MDEREF_AV_gvsv_vivify_rv2av_aelem:
+			case MDEREF_AV_padsv_vivify_rv2av_aelem:
+			    ++items;
+			    goto do_elem;
+			case MDEREF_HV_pop_rv2hv_helem:
+			case MDEREF_HV_vivify_rv2hv_helem:
+			    is_hash = 1;
+			case MDEREF_AV_pop_rv2av_aelem:
+			case MDEREF_AV_vivify_rv2av_aelem:
+			do_elem:
+			    switch (actions & MDEREF_INDEX_MASK) {
+				case MDEREF_INDEX_none:
+				    last = 1;
+				    break;
+				case MDEREF_INDEX_const:
+				    ++items;
+				    if (is_hash) {
+#ifdef USE_ITHREADS
+					SV *key = PAD_SVl(items->pad_offset);
+#else
+					SV *key = items->sv;
+#endif
+					sv_size(aTHX_ st, key, SOME_RECURSION);
+				    }
+				    break;
+				case MDEREF_INDEX_padsv:
+				case MDEREF_INDEX_gvsv:
+				    ++items;
+				    break;
+			    }
+			    if (actions & MDEREF_FLAG_last)
+				last = 1;
+			    is_hash = 0;
+			    break;
+			default:
+			    last = 1;
+			    break;
+		    }
+		    actions >>= MDEREF_SHIFT;
+		}
+	    }
 	    TAG;break;
 #endif
       default:
