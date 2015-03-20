@@ -283,12 +283,93 @@ sub cmp_array_ro {
     }
 }
 
+# The intent of the following block of tests was to avoid repeating the
+# potential regression if one changes how hashes are iterated. Specifically,
+# commit f3cf7e20cc2a7a5a moves the iteration over hash values from total_size()
+# to sv_size(). The final commit is complex, and somewhat a hack, as described
+# in the comment in Size.xs above the definition of "NO_RECURSION".
+
+# My original assumption was that the change (moving the iteration) was going to
+# be simple, and look something like this:
+
+=for a can of worms :-(
+
+--- Size.xs	2015-03-20 21:00:31.000000000 +0100
++++ ../Devel-Size-messy/Size.xs	2015-03-20 20:51:19.000000000 +0100
+@@ -615,6 +615,8 @@
+               st->total_size += HEK_BASESIZE + cur_entry->hent_hek->hek_len + 2;
+             }
+           }
++          if (recurse)
++              sv_size(aTHX_ st, HeVAL(cur_entry), recurse);
+           cur_entry = cur_entry->hent_next;
+         }
+       }
+@@ -828,17 +830,6 @@
+         }
+       }
+       TAG;break;
+-
+-    case SVt_PVHV: TAG;
+-      dbg_printf(("# Found type HV\n"));
+-      /* Is there anything in here? */
+-      if (hv_iterinit((HV *)thing)) {
+-        HE *temp_he;
+-        while ((temp_he = hv_iternext((HV *)thing))) {
+-          av_push(pending_array, hv_iterval((HV *)thing, temp_he));
+-        }
+-      }
+-      TAG;break;
+      
+     case SVt_PVGV: TAG;
+       dbg_printf(("# Found type GV\n"));
+
+=cut
+
+# nice and clean, removes 11 lines of special case clause for SVt_PVHV, adding
+# only 2 into an existing loop.
+
+# And it opened up a total can of worms. Existing tests failed because typeglobs
+# in subroutines leading to symbol tables were now being followed, making
+# reported sizes for subroutines now massively bigger.
+
+# And it turned out (or seemed to be) that subroutines could even end up
+# dragging in the entire symbol table in some cases. Hence a block of tests
+# was added to verify that the reported size of &cmp_array_ro didn't explode as
+# a result of this (or any further) refactoring.
+
+# Obviously the patch above is broken, so it never got applied. But the test to
+# prevent it *did*. Which was fine for 4 years. Except that it turns out that
+# the test is actually sensitive to the size of Test::More::is() (because the
+# subroutine cmp_array_ro() calls is()). And hence the test now *fails* because
+# Test::More::is() got refactored.
+
+# Which is a pain.
+# So we get back to "what are we actually trying to test?"
+# And really, the minimal thing that we were actually trying to test all along
+# was *only* that a subroutine in a package with (other) imported subroutines
+# doesn't get the size of their package rolled into it.
+# Hence *this* is what the test should have been all along:
+
 {
-    my $sub_size = total_size(\&cmp_array_ro);
-    cmp_ok($sub_size, '>=', 5120, 'subroutine is at least 5K');
+    package SWIT;
+    use Test::More;
+    sub sees_test_more {
+        # This subroutine is in a package whose stash now contains typeglobs
+        # which point to subroutines in Test::More. \%Test::More:: is rather
+        # big, and we shouldn't be counting is size as part of the size of this
+        # (empty!) subroutine.
+    }
+}
+
+{
+    # This used to be total_size(\&cmp_array_ro);
+    my $sub_size = total_size(\&SWIT::sees_test_more);
+    cmp_ok($sub_size, '>=', 2048, 'subroutine is at least 2K');
     cmp_ok($sub_size, '<=', 51200, 'subroutine is no more than 50K')
 	or diag 'Is total_size() dragging in the entire symbol table?';
-    cmp_ok(total_size(\%::), '>=', 10240, 'symbol table is at least 100K');
+    cmp_ok(total_size(\%Test::More::), '>=', 102400,
+           "Test::More's symbol table is at least 100K");
 }
 
 cmp_ok(total_size(\%Exporter::), '>', total_size(\%Exporter::Heavy::));

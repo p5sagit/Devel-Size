@@ -10,6 +10,8 @@ Revision history for Perl extension Devel::Size.
     More usefully, the slot is now used for XS versioning protection, which
     means that we can be confident that nothing out there is using it for data.
     Reported as [CPAN #102909].
+  * Avoid t/recurse.t failing because Test::More::is() has been refactored and
+    is now larger than it was. [CPAN #102910].
 
 0.79_51 2015-02-28 nicholas
   * as of 5.20.0, s/// is no longer a reliable test for OOK [CPAN #95493]
