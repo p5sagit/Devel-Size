@@ -5,6 +5,8 @@ Revision history for Perl extension Devel::Size.
     (subroutines are smaller than it assumes)
   * Count the size of padlist names in CVs (for v5.18 and later - earlier TODO)
   * Handle PADNAMELIST/PADNAME introduced in v5.21.7
+    two patches from Zefram:
+  * Add handling of children of METHOP and UNOP_AUX ops [CPAN #102911]
 
 0.79_52 2015-03-20 nicholas
     two patches from Zefram:

@@ -551,7 +551,9 @@ op_size(pTHX_ const OP * const baseop, struct state *st)
 #ifdef OA_METHOP
 	case OPc_METHOP: TAG;
 	    st->total_size += sizeof(struct methop);
-	    if (baseop->op_type != OP_METHOD)
+	    if (baseop->op_type == OP_METHOD)
+		op_size(aTHX_ ((UNOP *)baseop)->op_first, st);
+	    else
 		sv_size(aTHX_ st, cMETHOPx_meth(baseop), SOME_RECURSION);
 #if PERL_VERSION*1000+PERL_SUBVERSION >= 21007
 	    if (baseop->op_type == OP_METHOD_REDIR || baseop->op_type == OP_METHOD_REDIR_SUPER) {
@@ -565,6 +567,7 @@ op_size(pTHX_ const OP * const baseop, struct state *st)
 #ifdef OA_UNOP_AUX
 	case OPc_UNAUXOP: TAG;
 	    st->total_size += sizeof(struct unop_aux) + sizeof(UNOP_AUX_item) * (cUNOP_AUXx(baseop)->op_aux[-1].uv+1);
+	    op_size(aTHX_ ((UNOP *)baseop)->op_first, st);
 	    if (baseop->op_type == OP_MULTIDEREF) {
 		UNOP_AUX_item *items = cUNOP_AUXx(baseop)->op_aux;
 		UV actions = items->uv;
