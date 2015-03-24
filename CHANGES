@@ -1,6 +1,8 @@
 Revision history for Perl extension Devel::Size.
 
-0.79_53 2015-03-21 nicholas
+0.79_53 2015-03-25 nicholas
+  * Avoid t/recurse.t failing on earlier versions on 32 bit platforms
+    (subroutines are smaller than it assumes)
 
 0.79_52 2015-03-20 nicholas
     two patches from Zefram:

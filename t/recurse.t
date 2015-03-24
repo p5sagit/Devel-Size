@@ -9,6 +9,7 @@
 use Test::More;
 use strict;
 use Devel::Size ':all';
+use Config;
 
 my %types = (
     NULL => undef,
@@ -365,7 +366,8 @@ sub cmp_array_ro {
 {
     # This used to be total_size(\&cmp_array_ro);
     my $sub_size = total_size(\&SWIT::sees_test_more);
-    cmp_ok($sub_size, '>=', 2048, 'subroutine is at least 2K');
+    my $want = 1.5 + 0.125 * $Config{ptrsize};
+    cmp_ok($sub_size, '>=', $want, "subroutine is at least ${want}K");
     cmp_ok($sub_size, '<=', 51200, 'subroutine is no more than 50K')
 	or diag 'Is total_size() dragging in the entire symbol table?';
     cmp_ok(total_size(\%Test::More::), '>=', 102400,
