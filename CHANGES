@@ -4,6 +4,7 @@ Revision history for Perl extension Devel::Size.
   * Avoid t/recurse.t failing on earlier versions on 32 bit platforms
     (subroutines are smaller than it assumes)
   * Count the size of padlist names in CVs (for v5.18 and later - earlier TODO)
+  * Handle PADNAMELIST/PADNAME introduced in v5.21.7
 
 0.79_52 2015-03-20 nicholas
     two patches from Zefram:

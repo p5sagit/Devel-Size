@@ -759,15 +759,46 @@ const U8 body_sizes[SVt_LAST] = {
 #endif
 };
 
-#ifdef PadlistNAMES
+#if PERL_VERSION*1000+PERL_SUBVERSION >= 21007
+/* This is, as ever, excessively nosey with the implementation, and hence
+   fragile. */
+padlist_size(pTHX_ struct state *const st, const PADLIST * const padl,
+	const int recurse) {
+    SSize_t i;
+    const PADNAMELIST *pnl;
+
+    if (!check_new(st, padl))
+	return;
+    st->total_size += sizeof(PADLIST);
+
+    st->total_size += sizeof(PADNAMELIST);
+    pnl = PadlistNAMES(padl);
+    st->total_size += pnl->xpadnl_max * sizeof(PADNAME *);
+    i = PadnamelistMAX(pnl) + 1;
+    while (--i) {
+        const PADNAME *const pn =
+		PadnamelistARRAY(pnl)[i];
+        if (!pn || pn == &PL_padname_undef || pn == &PL_padname_const)
+            continue;
+        if (!check_new(st, pn))
+            continue;
+        st->total_size += STRUCT_OFFSET(struct padname_with_str, xpadn_str[0])
+            + PadnameLEN(pn) + 1;
+    }
+
+    i = PadlistMAX(padl) + 1;
+    st->total_size += sizeof(PAD*) * i;
+    while (--i)
+	sv_size(aTHX_ st, (SV*)PadlistARRAY(padl)[i], recurse);
+}
+
+#elif defined PadlistNAMES
 static void
 padlist_size(pTHX_ struct state *const st, const PADLIST * const padl,
 	const int recurse) {
     SSize_t i;
     if (!check_new(st, padl))
 	return;
-    /* This relies on PADNAMELIST and PAD being typedefed to AV.  If that
-       ever changes, this code will need an update. */
     st->total_size += sizeof(PADLIST);
     sv_size(aTHX_ st, (SV*)PadlistNAMES(padl), TOTAL_SIZE_RECURSION);
     i = PadlistMAX(padl) + 1;
