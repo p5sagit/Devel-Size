@@ -769,7 +769,7 @@ padlist_size(pTHX_ struct state *const st, const PADLIST * const padl,
     /* This relies on PADNAMELIST and PAD being typedefed to AV.  If that
        ever changes, this code will need an update. */
     st->total_size += sizeof(PADLIST);
-    sv_size(aTHX_ st, (SV*)PadlistNAMES(padl), recurse);
+    sv_size(aTHX_ st, (SV*)PadlistNAMES(padl), TOTAL_SIZE_RECURSION);
     i = PadlistMAX(padl) + 1;
     st->total_size += sizeof(PAD*) * i;
     while (--i)

@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 
 use strict;
-use Test::More tests => 14;
+use Test::More tests => 18;
 use Devel::Size ':all';
 
 sub zwapp;
@@ -89,3 +89,36 @@ if ($] > 5.017001) {
 	   total_size(closure_without_eval()) + 256,
 	   "CvOUTSIDE is set on all cloned closures, so these won't differ by much");
 }
+
+sub two_lex {
+    my $a;
+    my $b;
+}
+
+sub ode {
+    my $We_are_the_music_makers_And_we_are_the_dreamers_of_dreams_Wandering_by_lone_sea_breakers_And_sitting_by_desolate_streams_World_losers_and_world_forsakers_On_whom_the_pale_moon_gleams_Yet_we_are_the_movers_and_shakers_Of_the_world_for_ever_it_seems;
+    my $With_wonderful_deathless_ditties_We_build_up_the_world_s_great_cities_And_out_of_a_fabulous_story_We_fashion_an_empire_s_glory_One_man_with_a_dream_at_pleasure_Shall_go_forth_and_conquer_a_crown_And_three_with_a_new_song_s_measure;
+    # /Ode/, Arthur O'Shaughnessy, published in 1873.
+    # Sadly all but one of the remaining versus are too long for an identifier.
+}
+
+my $two_lex_size = total_size(\&two_lex);
+cmp_ok($two_lex_size, '>', $crunch_size,
+       '&two_lex is bigger than an empty sub');
+cmp_ok($two_lex_size, '<', $crunch_size + 2048,
+       '&two_lex is bigger than an empty sub by less than 2048 bytes');
+
+my $ode_size = total_size(\&ode);
+{
+    # Fixing this for pre-v5.18 involves solving the more general problem of
+    # when to "recurse" into nested structures, currently bodged with
+    # "SOME_RECURSION" and friends. :-(
+    local $::TODO =
+        'Devel::Size has never handled the size of names in the pad correctly'
+        if $] < 5.017004;
+    cmp_ok($ode_size, '>', $two_lex_size + 384,
+           '&ode is bigger than a sub with two lexicals by least 384 bytes');
+}
+
+cmp_ok($ode_size, '<', $two_lex_size + 768,
+       '&ode is bigger than a sub with two lexicals by less than 768 bytes');
