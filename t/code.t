@@ -4,6 +4,27 @@ use strict;
 use Test::More tests => 18;
 use Devel::Size ':all';
 
+# For me, for some files locally, I'm seeing failures
+# Failed test '&two_lex is bigger than an empty sub by less than 2048 bytes'
+# Just for some perl versions (5.8.7, 5.10.1, some 5.12.*)
+# As ever, the reason is subtle and annoying. As this test is running in package
+# main, loading modules at runtime might create entries in %::
+# In this case, it's just one key, '_</.../lib/perl5/5.12.4/overload.pm'
+# because Test::More is demand loading overload at the first test.
+# So the first fix I tried was to "encourage" Test::More to get all this done
+# before we start doing things that are sensitive to the size of %::
+# with this:
+#
+# cmp_ok(1, '==', 1, "prompt Test::More to load everything it needs *now*");
+#
+# which fixed most things, but not 5.8.7, which (*only under make test*) would
+# fail '&two_lex is bigger than an empty sub by less than 2048 bytes'
+# Turns out that Test::More 0.54 creates an entry in %:: for every test run
+# (not sure why, side effect of an eval with a #line directive, maybe?)
+# The solution is to measure (and re-measure) the size of things you're
+# comparing as contiguous statements, assigning to variables, and then make
+# calls to Test::More functions.
+
 sub zwapp;
 sub swoosh($$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$);
 sub crunch {
@@ -102,6 +123,8 @@ sub ode {
     # Sadly all but one of the remaining versus are too long for an identifier.
 }
 
+# Aargh, re-measure it. See comment at the top of the file.
+$crunch_size = total_size(\&crunch);
 my $two_lex_size = total_size(\&two_lex);
 cmp_ok($two_lex_size, '>', $crunch_size,
        '&two_lex is bigger than an empty sub');

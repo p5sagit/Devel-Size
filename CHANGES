@@ -2,6 +2,7 @@ Revision history for Perl extension Devel::Size.
 
 0.79_54 2015-03-27 nicholas
   * Fix the definition of padlist_size() for post-5.20 perls.
+  * Avoid tests failing because Test::More lazy-loading changes the size of %::
 
 0.79_53 2015-03-25 nicholas
   * Avoid t/recurse.t failing on earlier versions on 32 bit platforms
