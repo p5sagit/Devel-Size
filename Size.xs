@@ -7,6 +7,11 @@
 #include "XSUB.h"
 #include "ppport.h"
 
+#ifndef PERL_COMBI_VERSION
+#define PERL_COMBI_VERSION (PERL_REVISION * 1000000 + PERL_VERSION * 1000 + \
+				PERL_SUBVERSION)
+#endif
+
 /* Not yet in ppport.h */
 #ifndef CvISXSUB
 #  define CvISXSUB(cv)  (CvXSUB(cv) ? TRUE : FALSE)
@@ -762,11 +767,17 @@ const U8 body_sizes[SVt_LAST] = {
 #endif
 };
 
+#if PERL_COMBI_VERSION < 5008001
+typedef AV PADLIST;
+#endif
+
+static void
+padlist_size(pTHX_ struct state *const st, const PADLIST * const padl,
+	const int recurse) {
+
 #if PERL_VERSION*1000+PERL_SUBVERSION >= 21007
 /* This is, as ever, excessively nosey with the implementation, and hence
    fragile. */
-padlist_size(pTHX_ struct state *const st, const PADLIST * const padl,
-	const int recurse) {
     SSize_t i;
     const PADNAMELIST *pnl;
 
@@ -793,12 +804,9 @@ padlist_size(pTHX_ struct state *const st, const PADLIST * const padl,
     st->total_size += sizeof(PAD*) * i;
     while (--i)
 	sv_size(aTHX_ st, (SV*)PadlistARRAY(padl)[i], recurse);
-}
 
 #elif defined PadlistNAMES
-static void
-padlist_size(pTHX_ struct state *const st, const PADLIST * const padl,
-	const int recurse) {
+
     SSize_t i;
     if (!check_new(st, padl))
 	return;
@@ -808,14 +816,13 @@ padlist_size(pTHX_ struct state *const st, const PADLIST * const padl,
     st->total_size += sizeof(PAD*) * i;
     while (--i)
 	sv_size(aTHX_ st, (SV*)PadlistARRAY(padl)[i], recurse);
-}
+
 #else 
-static void
-padlist_size(pTHX_ struct state *const st, const AV * const padl,
-	const int recurse) {
+
     sv_size(aTHX_ st, (SV*)padl, recurse);
-}
+
 #endif
+}
 
 static void
 sv_size(pTHX_ struct state *const st, const SV * const orig_thing,
