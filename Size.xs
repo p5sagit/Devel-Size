@@ -133,9 +133,10 @@ check_new(struct state *st, const void *const p) {
 	bits -= 8;
     } while (bits > LEAF_BITS + BYTE_BITS);
     /* bits now 16 always */
-#if !defined(MULTIPLICITY) || PERL_VERSION > 8 || (PERL_VERSION == 8 && PERL_SUBVERSION > 8)
-    /* 5.8.8 and early have an assert() macro that uses Perl_croak, hence needs
-       a my_perl under multiplicity  */
+#if PERL_COMBI_VERSION > 5008008 || (!defined(MULTIPLICITY) && !defined(USE_THREADS))
+    /* 5.8.8 and earlier have an assert() macro that uses Perl_croak, hence
+       needs a my_perl under multiplicity. Similarly, under 5.005 threads
+       Perl_croak needs a thr. In both cases, just skip the assert.  */
     assert(bits == 16);
 #endif
     leaf_p = (U8 **)tv_p;
