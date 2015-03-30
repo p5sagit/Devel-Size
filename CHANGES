@@ -1,5 +1,8 @@
 Revision history for Perl extension Devel::Size.
 
+0.80 2015-03-31 nicholas
+ [no changes]
+
 0.79_54 2015-03-27 nicholas
   * Fix the definition of padlist_size() for post-5.20 perls.
   * Avoid tests failing because Test::More lazy-loading changes the size of %::
